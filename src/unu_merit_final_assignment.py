@@ -281,6 +281,10 @@ class ECI:
         for country_index, i in enumerate(indices):
             print(f"\t{country_index:2}: {self.countries[country_index]:20} = {i:.5}")
 
+    def _print_product_indices(self, indices):
+        for product_index, i in enumerate(indices):
+            print(f"\t{product_index:2}: {self.activities[product_index]:2} = {i:.5}")
+
     def _print_sorted_indices(self, indices, unsign=False):
         if unsign:
             indices = [abs(i) for i in indices]
@@ -289,6 +293,15 @@ class ECI:
 
         for pos, i in enumerate(order_countries):
             print(f"\t{pos+1}. - ({i:1}) {self.countries[i]:20} = {indices[i]:.5}")
+
+    def _print_sorted_product_indices(self, indices, unsign=False):
+        if unsign:
+            indices = [abs(i) for i in indices]
+
+        order_products = np.argsort(indices)[::-1]
+
+        for pos, i in enumerate(order_products):
+            print(f"\t{pos+1}. - ({i:1}) {self.activities[i]:2} = {indices[i]:.5}")
 
     def _save_indices(self, indices, unsign=False):
         self.eci_index = []
@@ -326,14 +339,13 @@ class ECI:
 
         print("--- --- ---")
 
-    def do_eigen_values(self):
+    def do_eigen_values_eci(self):
         """ECI as an eigenvalue problem"""
 
         Mcp = self.Mcp
 
         # Projecting Matrices
         Ccc = np.matmul(np.array(Mcp.transpose()/np.sum(Mcp,1)).transpose(),np.array(Mcp/np.sum(Mcp,0)).transpose())
-        Cpp = np.matmul(np.array(Mcp/np.sum(Mcp,0)).transpose(),np.array(Mcp.transpose()/np.sum(Mcp,1)).transpose())
 
         # Compute eigenvalues and eigenvectors
         eigvalues, eigvectors = np.linalg.eig(Ccc)
@@ -356,6 +368,35 @@ class ECI:
         self._print_sorted_indices(ECI)
         print("Ordered (sign removed):")
         self._print_sorted_indices(ECI, True)
+
+        print("--- --- ---")
+
+    def do_eigen_values_pci(self):
+        """PCI as an eigenvalue problem"""
+
+        Mcp = self.Mcp
+
+        # Projecting Matrices
+        Cpp = np.matmul(np.array(Mcp/np.sum(Mcp,0)).transpose(),np.array(Mcp.transpose()/np.sum(Mcp,1)).transpose())
+
+        # Compute eigenvalues and eigenvectors
+        eigvalues, eigvectors = np.linalg.eig(Cpp)
+
+        # PCI is the eigenvector corresponding to the second largest eigenvalue
+        PCI = eigvectors[:,eigvalues.argsort()[-2]]
+
+        # Normalizing PCI
+        PCI = (PCI - PCI.mean())/PCI.std()
+
+        print(f"PCI as an eigenvalue problem:")
+        self._print_product_indices(PCI)
+        print("---")
+
+        #Print the order
+        print("Ordered:")
+        self._print_sorted_product_indices(PCI)
+        print("Ordered (sign removed):")
+        self._print_sorted_product_indices(PCI, True)
 
         print("--- --- ---")
 
@@ -579,7 +620,11 @@ Index1.show_eci(True)
 
 ###
 
-Index1.do_eigen_values()
+Index1.do_eigen_values_eci()
+
+###
+
+Index1.do_eigen_values_pci()
 
 ###
 
