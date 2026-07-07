@@ -2,37 +2,50 @@
 
 ## Group 4
 
-This place stores the assignment for ECI project and the actual code and Jupyter Notebooks with the outputs.
+This place hosts the files for the assignment of
 
-## Note (!)
+- Assignment document
+- Python code
+- Jupyter notebook(s) with the outputs
+- Presentation slides
+
+---
+
+## Note: IMPORTANT (!)
 
 **If any change is required - make a Pull Request!**
 
-The `ipynb` file (Notebook) should be based upon the one in this repo - and all output cleared...
+The `ipynb` file (Jupyter notebook) should be based upon the one in this repo - and **all output cleared**...
 
-**Do not commit notebook with pictures and outputs...**
+**(!) Do not commit notebook with pictures and outputs...**
 
 Thank You
 
+---
+
 ## Layout
 
-### Docs
+### docs/
 
 The assignment is there.
 
-### src
+### src/
 
 There is the original python script which I wrote to test and debug - from that the initial notebook was made.
 
-### Archive Directory
+### archive/
 
 This serves as storage of the artefacts - for those who cannot re-run the code.
+
+It also stores the presentation slides.
 
 ```
 .
 ├── README.md
 ├── archive
+│   ├── eci_slides_group4.pdf
 │   ├── unu_merit_final_assignment_osp.html
+│   ├── unu_merit_final_assignment_osp.ipynb
 │   └── unu_merit_final_assignment_osp.pdf
 ├── docs
 │   └── Final Assignment Economic Complexity Report.pdf
