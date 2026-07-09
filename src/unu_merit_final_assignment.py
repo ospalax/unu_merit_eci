@@ -204,6 +204,23 @@ class ECI:
         plt.title("Scatter plot of ECI values")
         plt.show()
 
+    def show_pci(self, unsign=False, sizex=6, sizey=6):
+        """Show PCI indices for the activities"""
+
+        pci_index = self.do_eigen_values_pci()
+
+        if unsign:
+            pci = [abs(i) for i in pci_index]
+        else:
+            pci = pci_index
+
+        plt.figure(figsize=(sizex, sizey))
+        plt.scatter(self.activities, pci)
+        plt.xticks([i for i in range(len(self.activities))], self.activities, rotation=45)
+        plt.ylabel("PCI")
+        plt.title("Scatter plot of PCI values")
+        plt.show()
+
     def print(self):
         """Print initial summary"""
 
@@ -474,13 +491,22 @@ class ECI:
 
         print("--- --- ---")
 
-    def show_fitness(self, iterations=10):
+    def _prepare_series(self, iterations=10):
         N = iterations
-        Fseries=[]
+        Fseries = []
+        Qseries = []
         for iteration in range(N):
             F, Q = self.FitnessComplexity(iteration)
             Fseries.append(F)
-        Fseries=np.array(Fseries)
+            Qseries.append(Q)
+        Fseries = np.array(Fseries)
+        Qseries = np.array(Qseries)
+
+        return Fseries, Qseries
+
+    def show_fitness(self, iterations=10):
+        N = iterations
+        Fseries, _ = self._prepare_series(iterations)
 
         fig,ax=plt.subplots(1,1,)
         plt.plot(Fseries)
@@ -488,6 +514,18 @@ class ECI:
         plt.ylabel('Fitness')
         plt.xticks(range(0,N,5),range(0,N,5))
         plt.title("Chart of Fitness")
+        plt.show()
+
+    def show_complexity(self, iterations=10):
+        N = iterations
+        _, Qseries = self._prepare_series(iterations)
+
+        fig,ax=plt.subplots(1,1,)
+        plt.plot(Qseries)
+        plt.xlabel('Iteration')
+        plt.ylabel('Complexity')
+        plt.xticks(range(0,N,5),range(0,N,5))
+        plt.title("Chart of Complexity")
         plt.show()
 
     def show_fitness_and_complexity(self, iterations=10):
@@ -745,7 +783,11 @@ Index1.print_pci()
 
 ###
 
-Index1.show_eci(True)
+Index1.show_eci()
+
+###
+
+Index1.show_pci()
 
 ###
 
@@ -754,6 +796,7 @@ Index1.print_fitness_and_complexity()
 ###
 
 Index1.show_fitness()
+Index1.show_complexity()
 
 ###
 
@@ -762,6 +805,7 @@ Index1.print_fitness_and_complexity(30)
 ###
 
 Index1.show_fitness(30)
+Index1.show_complexity(30)
 
 ###
 
