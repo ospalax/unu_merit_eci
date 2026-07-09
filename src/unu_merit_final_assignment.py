@@ -558,6 +558,21 @@ class ECI:
         plt.tight_layout()
         plt.show()
 
+    def show_activity_heatmap(self, sizex=6, sizey=5):
+        Jpp = self.calc_cooccurrencies()
+
+        plt.figure(figsize=(sizex, sizey))
+        plt.pcolor(Jpp, cmap='Blues')
+        plt.gca().invert_yaxis()
+        plt.xticks([i + 0.5 for i in range(len(self.activities))], self.activities)
+        plt.yticks([i + 0.5 for i in range(len(self.activities))], self.activities)
+        plt.title("Relatedness (Co-occurrencies)")
+        plt.xlabel("Activities")
+        plt.ylabel("Activities")
+        plt.colorbar(label="Activity co-occurrency")
+        plt.tight_layout()
+        plt.show()
+
 #####################################################################
 
 #
@@ -653,6 +668,10 @@ Index1.show_fitness_and_complexity()
 ###
 
 Index1.print_cooccurrencies()
+
+###
+
+Index1.show_activity_heatmap()
 
 ###
 
