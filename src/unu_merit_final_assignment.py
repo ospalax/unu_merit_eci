@@ -434,6 +434,29 @@ class ECI:
 
         return (F / F.mean()), (Q/Q.mean())
 
+    def print_fitness_and_complexity(self, iterations=10):
+        F, Q = self.FitnessComplexity(iterations)
+
+        print(f"Fitness Ranking (Iterations: {iterations}):")
+        self._print_indices(F)
+        print("---")
+
+        #Print the order
+        print("Ordered:")
+        self._print_sorted_indices(F)
+
+        print("--- --- ---")
+
+        print(f"Complexity Ranking (Iterations: {iterations}):")
+        self._print_product_indices(Q)
+        print("---")
+
+        #Print the order
+        print("Ordered:")
+        self._print_sorted_product_indices(Q)
+
+        print("--- --- ---")
+
     def show_fitness(self, iterations=10):
         N = iterations
         Fseries=[]
@@ -659,7 +682,19 @@ Index1.show_eci(True)
 
 ###
 
+Index1.print_fitness_and_complexity()
+
+###
+
 Index1.show_fitness()
+
+###
+
+Index1.print_fitness_and_complexity(30)
+
+###
+
+Index1.show_fitness(30)
 
 ###
 
