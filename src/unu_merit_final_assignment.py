@@ -546,6 +546,18 @@ class ECI:
 
         plt.show()
 
+    def show_proximity_heatmap(self, sizex=6, sizey=5):
+        proximity = self.Taxonomy()
+
+        plt.figure(figsize=(sizex, sizey))
+        plt.imshow(proximity, cmap='RdYlBu_r', aspect='auto', interpolation='nearest')
+        plt.colorbar(label='Relatedness (Proximity)')
+        plt.xticks(range(len(activities)), activities, rotation=45, ha='right')
+        plt.yticks(range(len(activities)), activities)
+        plt.title('Product Relatedness Heatmap', fontsize=14)
+        plt.tight_layout()
+        plt.show()
+
 #####################################################################
 
 #
@@ -649,5 +661,9 @@ Index1.print_relatedness()
 ###
 
 Index1.show_relatedness()
+
+###
+
+Index1.show_proximity_heatmap()
 
 ###
