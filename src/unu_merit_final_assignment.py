@@ -18,6 +18,7 @@ __author__ = "Petr Ospalý"
 # ...it was intended to be broken up to run in Jupyter Notebook
 #
 
+import pandas as pd
 import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
@@ -31,7 +32,7 @@ class ECI:
         self.matrix = matrix
         self.Mcp = np.array(matrix)
         self.G = self.create_graph()
-        self.eci_index = []
+        self._eci = {}
 
     def diversification(self, Mcp=None):
         """Diversification: first order approximation of complexity"""
@@ -186,13 +187,15 @@ class ECI:
     def show_eci(self, unsign=False, sizex=6, sizey=6):
         """Show ECI indices for the countries"""
 
-        if len(self.eci_index) <= 0:
+        if ('index' not in self._eci) or (len(self._eci['index']) <= 0):
             raise ValueError("No method was used to set ECI indices")
 
+        eci_index = self._eci['index']
+
         if unsign:
-            eci = [abs(i) for i in self.eci_index]
+            eci = [abs(i) for i in eci_index]
         else:
-            eci = self.eci_index
+            eci = eci_index
 
         plt.figure(figsize=(sizex, sizey))
         plt.scatter(self.countries, eci)
@@ -303,13 +306,16 @@ class ECI:
         for pos, i in enumerate(order_products):
             print(f"\t{pos+1}. - ({i:1}) {self.activities[i]:2} = {indices[i]:.5}")
 
-    def _save_indices(self, indices, unsign=False):
-        self.eci_index = []
+    def _save_indices(self, indices, label, unsign=False):
+
+        self._eci['label'] = label
+        self._eci['index'] = []
+
         for i in indices:
             if unsign:
-                self.eci_index.append(abs(i))
+                self._eci['index'].append(abs(i))
             else:
-                self.eci_index.append(i)
+                self._eci['index'].append(i)
 
     def do_method_of_reflections_once(self):
         """Compute one step, starting from diversification and ubiquity"""
@@ -323,23 +329,13 @@ class ECI:
         """Compute ECI with the MethodOfReflections"""
 
         kc, _ = self.MethodOfReflections(iterations)
-        print(f"Method of Reflections (Iterations: {iterations}):")
-        self._print_indices(kc)
-        print("---")
 
         # store the index for chart
-        #self.eci_index = kc
-        self._save_indices(kc)
+        self._save_indices(kc, f"Method of Reflections (Iterations: {iterations}):")
 
-        #Print the order
-        print("Ordered:")
-        self._print_sorted_indices(kc)
-        print("Ordered (sign removed):")
-        self._print_sorted_indices(kc, True)
+        return kc
 
-        print("--- --- ---")
-
-    def do_eigen_values_eci(self):
+    def do_eigen_values_eci(self, verbose=False):
         """ECI as an eigenvalue problem"""
 
         Mcp = self.Mcp
@@ -356,18 +352,28 @@ class ECI:
         # Normalizing ECI
         ECI = (ECI - ECI.mean())/ECI.std()
 
-        print(f"ECI as an eigenvalue problem:")
-        self._print_indices(ECI)
+        # store the index for chart
+        self._save_indices(ECI, "ECI as an eigenvalue problem:")
+
+        return ECI
+
+    def print_eci(self):
+        """Print ECI index"""
+
+        if ('index' not in self._eci) or (len(self._eci['index']) <= 0):
+            raise ValueError("No method was used to set ECI indices")
+
+        label = self._eci['label']
+        eci_index = self._eci['index']
+
+        print(label)
+        self._print_indices(eci_index)
         print("---")
 
-        # store the index for chart
-        self._save_indices(ECI)
-
-        #Print the order
         print("Ordered:")
-        self._print_sorted_indices(ECI)
+        self._print_sorted_indices(eci_index)
         print("Ordered (sign removed):")
-        self._print_sorted_indices(ECI, True)
+        self._print_sorted_indices(eci_index, True)
 
         print("--- --- ---")
 
@@ -387,6 +393,17 @@ class ECI:
 
         # Normalizing PCI
         PCI = (PCI - PCI.mean())/PCI.std()
+
+        self._pci = PCI
+
+        return PCI
+
+    def print_pci(self):
+
+        if hasattr(self, '_pci'):
+            PCI = self._pci
+        else:
+            raise ValueError("No PCI method was called - nothing to print")
 
         print(f"PCI as an eigenvalue problem:")
         self._print_product_indices(PCI)
@@ -494,6 +511,52 @@ class ECI:
 
         plt.title("Fitness and Complexity")
         plt.show()
+
+    def compare_countries(self, iterations=30):
+        """Compare ECI vs Fitness"""
+
+        diversification = self.diversification()
+        F, _ = self.FitnessComplexity(iterations)
+        eci = self.do_eigen_values_eci()
+
+        country_df = pd.DataFrame({
+            "Country": self.countries,
+            "Diversification": diversification,
+            "ECI": eci,
+            "Fitness": F
+        })
+
+        country_df["ECI Ranking"] = country_df["ECI"].rank(ascending=False).astype(int)
+        country_df["Fitness Ranking"] = country_df["Fitness"].rank(ascending=False).astype(int)
+        country_df["Difference"] = country_df["ECI Ranking"] - country_df["Fitness Ranking"]
+        country_df = country_df.sort_values("ECI Ranking").reset_index(drop=True)
+        country_df.index += 1
+
+        return country_df
+
+    def compare_activities(self, iterations=30):
+        """Compare PCI vs Complexity"""
+
+        ubiquity = self.ubiquity()
+        _, Q = self.FitnessComplexity(iterations)
+        pci = self.do_eigen_values_pci()
+
+        # Compare PCI vs Activity Complexity rankings
+        activity_df = pd.DataFrame({
+            "Activity": self.activities,
+            "Ubiquity": ubiquity,
+            "PCI": pci,
+            "Complexity": Q
+        })
+
+        activity_df["PCI Ranking"] = activity_df["PCI"].rank(ascending=False).astype(int)
+        activity_df["Complexity Ranking"] = activity_df["Complexity"].rank(ascending=False).astype(int)
+        activity_df = activity_df.sort_values("PCI Ranking").reset_index(drop=True)
+        activity_df["Difference"] = activity_df["PCI Ranking"] - activity_df["Complexity Ranking"]
+        activity_df.index += 1
+
+        return activity_df
+
 
     def calc_cooccurrencies(self):
         self.Jpp = self.Mcp.transpose().dot(self.Mcp)
@@ -655,10 +718,12 @@ Index1.do_method_of_reflections_once()
 ###
 
 Index1.do_method_of_reflections()
+Index1.print_eci()
 
 ###
 
 Index1.do_method_of_reflections(19)
+Index1.print_eci()
 
 ###
 
@@ -671,10 +736,12 @@ Index1.show_eci(True)
 ###
 
 Index1.do_eigen_values_eci()
+Index1.print_eci()
 
 ###
 
 Index1.do_eigen_values_pci()
+Index1.print_pci()
 
 ###
 
@@ -699,6 +766,13 @@ Index1.show_fitness(30)
 ###
 
 Index1.show_fitness_and_complexity()
+
+###
+
+print(Index1.compare_countries())
+print("---")
+print(Index1.compare_activities())
+print("--- --- ---")
 
 ###
 
