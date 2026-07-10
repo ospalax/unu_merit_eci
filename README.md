@@ -2,12 +2,13 @@
 
 ## Group 4
 
-This place hosts the files for the assignment of
+This place hosts the files for final assignment **Network Analysis and Economic Complexity for Sustainable Development**:
 
 - Assignment document
 - Python code
 - Jupyter notebook(s) with the outputs
 - Presentation slides
+- Report file
 
 ---
 
@@ -24,6 +25,10 @@ Thank You
 ---
 
 ## Layout
+
+### final/
+
+Final artefacts sent as the results for the assignment.
 
 ### docs/
 
@@ -45,10 +50,15 @@ It also stores the presentation slides.
 ├── archive
 │   ├── eci_slides_group4.pdf
 │   ├── unu_merit_final_assignment_osp.html
-│   ├── unu_merit_final_assignment_osp.ipynb
-│   └── unu_merit_final_assignment_osp.pdf
+│   └── unu_merit_final_assignment_osp.ipynb
 ├── docs
 │   └── Final Assignment Economic Complexity Report.pdf
+├── final
+│   ├── Group_4_Economic_Complexity_Report.pdf
+│   ├── eci_slides_group4.pdf
+│   ├── final.zip
+│   ├── unu_merit_final_assignment.html
+│   └── unu_merit_final_assignment.ipynb
 ├── src
 │   └── unu_merit_final_assignment.py
 └── unu_merit_final_assignment.ipynb
